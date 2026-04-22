@@ -47,7 +47,11 @@ def build_parser() -> argparse.ArgumentParser:
     render = sub.add_parser("render", help="Render a translated PDF from merged translations.")
     render.add_argument("run_dir", type=Path)
     render.add_argument("--output", type=Path)
-    render.add_argument("--mode", choices=["translated", "bilingual", "overlay"], default="bilingual")
+    render.add_argument(
+        "--mode",
+        choices=["translated", "bilingual", "overlay", "paper"],
+        default="bilingual",
+    )
     render.add_argument("--font-size", type=float, default=9.0)
 
     all_cmd = sub.add_parser("all", help="Prepare, translate, merge, and render in one command.")
@@ -60,7 +64,11 @@ def build_parser() -> argparse.ArgumentParser:
     all_cmd.add_argument("--codex-bin", default="codex")
     all_cmd.add_argument("--model")
     all_cmd.add_argument("--attempts", type=positive_int, default=2)
-    all_cmd.add_argument("--mode", choices=["translated", "bilingual", "overlay"], default="bilingual")
+    all_cmd.add_argument(
+        "--mode",
+        choices=["translated", "bilingual", "overlay", "paper"],
+        default="bilingual",
+    )
     all_cmd.add_argument("--font-size", type=float, default=9.0)
     all_cmd.add_argument("--force", action="store_true")
 

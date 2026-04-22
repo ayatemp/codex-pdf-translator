@@ -18,6 +18,7 @@ key into the PDF tool itself. It relies on your existing Codex login.
   - `bilingual`: original page image on the left, translated text on the right.
   - `translated`: translated text only, reflowed for reading.
   - `overlay`: rough translated text overlay on top of original page blocks.
+  - `paper`: translated text re-typeset as a clean paper-style reading PDF.
 
 This is not a drop-in BabelDOC clone. It prioritizes a controllable,
 agent-friendly workflow over pixel-perfect reconstruction.
@@ -72,7 +73,7 @@ Merge and render:
 
 ```bash
 codex-pdf-translate merge runs/ifal
-codex-pdf-translate render runs/ifal --mode bilingual --output runs/ifal/output/ifal-ja-bilingual.pdf
+codex-pdf-translate render runs/ifal --mode paper --output runs/ifal/output/ifal-ja-paper.pdf
 ```
 
 Or run the whole flow:
@@ -112,6 +113,8 @@ codex-pdf-translate render runs/ifal --mode translated
 
 - `bilingual` mode is the most reliable for papers because it preserves the
   original page visually while giving you readable translated text.
+- `paper` mode is the most readable Japanese output because it reflows the
+  translation into a clean paper-like layout.
 - `overlay` mode is useful for a BabelDOC-like feel, but long Japanese text may
   be shrunk or clipped inside the original English text boxes.
 - Codex CLI usage may still count against your Codex plan or subscription. The

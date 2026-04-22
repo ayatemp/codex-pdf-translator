@@ -57,3 +57,7 @@ def test_prepare_merge_render(tmp_path: Path) -> None:
     overlay_pdf = render_pdf(run_dir, tmp_path / "overlay.pdf", mode="overlay")
     assert overlay_pdf.exists()
     assert overlay_pdf.stat().st_size > 0
+
+    paper_pdf = render_pdf(run_dir, tmp_path / "paper.pdf", mode="paper")
+    assert paper_pdf.exists()
+    assert paper_pdf.stat().st_size > 0
