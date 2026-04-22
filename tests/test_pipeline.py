@@ -8,6 +8,7 @@ from reportlab.pdfgen import canvas
 from codex_pdf_translator.codex_engine import merge_translations
 from codex_pdf_translator.extract import prepare_run
 from codex_pdf_translator.jsonio import read_json, write_json
+from codex_pdf_translator.markdown_export import export_markdown
 from codex_pdf_translator.render import render_pdf
 
 
@@ -61,3 +62,7 @@ def test_prepare_merge_render(tmp_path: Path) -> None:
     paper_pdf = render_pdf(run_dir, tmp_path / "paper.pdf", mode="paper")
     assert paper_pdf.exists()
     assert paper_pdf.stat().st_size > 0
+
+    markdown = export_markdown(run_dir, tmp_path / "markdown")
+    assert markdown.exists()
+    assert "翻訳:" in markdown.read_text(encoding="utf-8")

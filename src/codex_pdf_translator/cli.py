@@ -6,6 +6,7 @@ from pathlib import Path
 from .codex_engine import merge_translations, translate_run, validate_translation
 from .extract import prepare_run
 from .jsonio import read_json
+from .markdown_export import export_markdown
 from .render import render_pdf
 
 
@@ -74,6 +75,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     status = sub.add_parser("status", help="Show chunk translation progress.")
     status.add_argument("run_dir", type=Path)
+
+    markdown = sub.add_parser(
+        "export-md",
+        help="Export a Japanese Markdown paper with cropped figure/table assets.",
+    )
+    markdown.add_argument("run_dir", type=Path)
+    markdown.add_argument("--output-dir", type=Path)
+    markdown.add_argument("--filename", default="paper-ja.md")
     return parser
 
 
@@ -166,6 +175,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "status":
         show_status(args.run_dir)
+        return 0
+
+    if args.command == "export-md":
+        output_dir = args.output_dir or args.run_dir / "output" / "markdown"
+        output = export_markdown(args.run_dir, output_dir, args.filename)
+        print(output)
         return 0
 
     raise AssertionError(args.command)

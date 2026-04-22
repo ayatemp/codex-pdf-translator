@@ -14,6 +14,7 @@ key into the PDF tool itself. It relies on your existing Codex login.
 - Calls `codex exec` per chunk and validates strict JSON translations.
 - Merges translated chunks into one `translations.json`.
 - Renders a final PDF with ReportLab.
+- Exports a Japanese Markdown reading file with cropped figure/table assets.
 - Supports three output modes:
   - `bilingual`: original page image on the left, translated text on the right.
   - `translated`: translated text only, reflowed for reading.
@@ -73,7 +74,7 @@ Merge and render:
 
 ```bash
 codex-pdf-translate merge runs/ifal
-codex-pdf-translate render runs/ifal --mode paper --output runs/ifal/output/ifal-ja-paper.pdf
+codex-pdf-translate export-md runs/ifal --output-dir runs/ifal/output/markdown
 ```
 
 Or run the whole flow:
@@ -121,6 +122,9 @@ codex-pdf-translate render runs/ifal --mode translated
   project simply avoids embedding a separate OpenAI API key.
 - The run directory is intentionally transparent: chunks, prompts, translations,
   and final PDFs are all inspectable files.
+- Markdown export writes one `paper-ja.md` plus PNG assets under `assets/`.
+  Use this when PDF layout reconstruction is less important than readable
+  Japanese text with figures and tables preserved as screenshots.
 
 ## Development
 
