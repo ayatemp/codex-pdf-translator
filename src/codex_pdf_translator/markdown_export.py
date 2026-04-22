@@ -202,7 +202,7 @@ def source_markdown_role(source: str, target: str) -> str:
         return "heading"
     if re.match(r"^\d+(\.\d+)*\s+", compact_source):
         return "heading"
-    if source.startswith(("Figure", "Table")) or target.startswith(("図", "表")):
+    if source.startswith(("Figure", "Table", "Algorithm")) or target.startswith(("図", "表", "アルゴリズム")):
         return "caption"
     return "body"
 
@@ -261,6 +261,31 @@ def page_asset_rects(page: fitz.Page) -> list[tuple[str, fitz.Rect]]:
     page_area = page.rect.width * page.rect.height
     rects: list[tuple[str, fitz.Rect]] = []
 
+    text_blocks: list[tuple[fitz.Rect, str]] = []
+    for block in page.get_text("dict").get("blocks", []):
+        if block.get("type") != 0:
+            continue
+        block_text = "\n".join(
+            "".join(span.get("text", "") for span in line.get("spans", []))
+            for line in block.get("lines", [])
+        ).strip()
+        if block_text:
+            text_blocks.append((fitz.Rect(block["bbox"]), block_text))
+
+    text_blocks.sort(key=lambda item: (item[0].y0, item[0].x0))
+    for index, (caption_rect, block_text) in enumerate(text_blocks):
+        if not re.match(r"^Algorithm\s+\d+:", block_text):
+            continue
+        algorithm_rect = fitz.Rect(caption_rect)
+        for next_rect, next_text in text_blocks[index + 1 :]:
+            if next_rect.y0 - algorithm_rect.y1 > 24:
+                break
+            if not looks_like_algorithm(next_text, next_text):
+                break
+            algorithm_rect.include_rect(next_rect)
+        if rect_area(algorithm_rect) > page_area * 0.01:
+            rects.append(("algorithm", algorithm_rect))
+
     for block in page.get_text("dict").get("blocks", []):
         if block.get("type") == 1:
             rect = fitz.Rect(block["bbox"])
@@ -286,7 +311,7 @@ def page_asset_rects(page: fitz.Page) -> list[tuple[str, fitz.Rect]]:
             rects.append(("figure", rect))
 
     grouped: list[tuple[str, fitz.Rect]] = []
-    for kind in ["figure", "table"]:
+    for kind in ["figure", "table", "algorithm"]:
         for rect in merge_rects([rect for rect_kind, rect in rects if rect_kind == kind], margin=18.0):
             if rect_area(rect) > page_area * 0.006:
                 grouped.append((kind, rect))
@@ -361,14 +386,18 @@ def segment_is_visual_label(segment: dict[str, Any], source: str) -> bool:
 
 
 def segment_inside_asset(segment: dict[str, Any], assets: list[Asset]) -> bool:
+    return segment_containing_asset(segment, assets) is not None
+
+
+def segment_containing_asset(segment: dict[str, Any], assets: list[Asset]) -> Asset | None:
     x0, y0, x1, y1 = segment["bbox"]
     center_x = (x0 + x1) / 2
     center_y = (y0 + y1) / 2
     for asset in assets:
         ax0, ay0, ax1, ay1 = asset.bbox
         if ax0 <= center_x <= ax1 and ay0 <= center_y <= ay1:
-            return True
-    return False
+            return asset
+    return None
 
 
 def segments_by_page(manifest: dict[str, Any]) -> dict[int, list[dict[str, Any]]]:
@@ -424,6 +453,19 @@ def export_markdown(run_dir: Path, output_dir: Path, filename: str = "paper-ja.m
         flush_algorithm()
         flush_formula()
 
+    def emit_asset(asset: Asset) -> None:
+        if asset.path in emitted_assets:
+            return
+        emitted_assets.add(asset.path)
+        rel = asset.path.relative_to(output_dir)
+        labels = {
+            "algorithm": "アルゴリズム",
+            "figure": "図表",
+            "table": "表",
+        }
+        label = labels.get(asset.kind, "図表")
+        lines.extend([f"![{label}: page {asset.page_index + 1}]({rel.as_posix()})", ""])
+
     first_segment_id = manifest["segments"][0]["id"] if manifest["segments"] else ""
     page_segments_map = segments_by_page(manifest)
 
@@ -437,14 +479,15 @@ def export_markdown(run_dir: Path, output_dir: Path, filename: str = "paper-ja.m
             role = source_markdown_role(source, raw_target)
             is_algorithm = looks_like_algorithm(source, raw_target)
             is_formula = looks_like_display_formula(source, raw_target, bool(pending_formula))
+            containing_asset = segment_containing_asset(segment, assets_by_page.get(page_index, []))
             if should_skip_markdown_segment(segment, raw_target) and not (is_algorithm or is_formula):
                 continue
             if segment_is_visual_label(segment, source) and not (is_algorithm or is_formula):
                 continue
             if (
                 role != "caption"
-                and segment_inside_asset(segment, assets_by_page.get(page_index, []))
-                and not (is_algorithm or is_formula)
+                and containing_asset is not None
+                and (containing_asset.kind == "algorithm" or not (is_algorithm or is_formula))
             ):
                 continue
 
@@ -492,18 +535,15 @@ def export_markdown(run_dir: Path, output_dir: Path, filename: str = "paper-ja.m
                     lines.extend([body_target, ""])
             elif role == "caption":
                 lines.extend([f"> {target}", ""])
+                if containing_asset is not None and containing_asset.kind == "algorithm":
+                    emit_asset(containing_asset)
             else:
                 paragraph = " ".join(part.strip() for part in target.splitlines() if part.strip())
                 lines.extend([paragraph, ""])
 
         flush_pending()
         for asset in assets_by_page.get(page_index, []):
-            if asset.path in emitted_assets:
-                continue
-            emitted_assets.add(asset.path)
-            rel = asset.path.relative_to(output_dir)
-            label = "図表" if asset.kind == "figure" else "表"
-            lines.extend([f"![{label}: page {page_index + 1}]({rel.as_posix()})", ""])
+            emit_asset(asset)
 
     output_path = output_dir / filename
     output_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
