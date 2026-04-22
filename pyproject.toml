@@ -1,0 +1,33 @@
+[project]
+name = "codex-pdf-translator"
+version = "0.1.0"
+description = "Translate PDFs through Codex CLI chunks, then rebuild readable translated PDFs."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Kaku Ayato" }
+]
+dependencies = [
+  "PyMuPDF>=1.24.0",
+  "reportlab>=4.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+]
+
+[project.scripts]
+codex-pdf-translator = "codex_pdf_translator.cli:main"
+codex-pdf-translate = "codex_pdf_translator.cli:main"
+
+[build-system]
+requires = ["setuptools>=69.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
