@@ -7,6 +7,7 @@ from .codex_engine import merge_translations, translate_run, validate_translatio
 from .extract import prepare_run
 from .jsonio import read_json
 from .markdown_export import export_markdown
+from .md_pdf import render_markdown_pdf
 from .render import render_pdf
 
 
@@ -83,6 +84,15 @@ def build_parser() -> argparse.ArgumentParser:
     markdown.add_argument("run_dir", type=Path)
     markdown.add_argument("--output-dir", type=Path)
     markdown.add_argument("--filename", default="paper-ja.md")
+
+    markdown_pdf = sub.add_parser(
+        "render-md-pdf",
+        help="Render a Markdown file with local image assets to a styled PDF via Chrome.",
+    )
+    markdown_pdf.add_argument("markdown", type=Path)
+    markdown_pdf.add_argument("--output", type=Path)
+    markdown_pdf.add_argument("--html", type=Path)
+    markdown_pdf.add_argument("--chrome")
     return parser
 
 
@@ -180,6 +190,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "export-md":
         output_dir = args.output_dir or args.run_dir / "output" / "markdown"
         output = export_markdown(args.run_dir, output_dir, args.filename)
+        print(output)
+        return 0
+
+    if args.command == "render-md-pdf":
+        output = render_markdown_pdf(args.markdown, args.output, args.html, args.chrome)
         print(output)
         return 0
 

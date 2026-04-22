@@ -54,6 +54,109 @@ def markdown_escape(text: str) -> str:
     return text.replace("\u00a0", " ").strip()
 
 
+def clean_inline_math(text: str) -> str:
+    text = re.sub(r"([θΘ])T\b", r"\1^T", text)
+    text = re.sub(r"∥([^∥]+?)∥2\s*2", r"∥\1∥_2^2", text)
+    text = re.sub(r"\bLu\s+(cls|reg|obj)\b", r"L_u^{\1}", text)
+    text = re.sub(r"\bLs\b", "L_s", text)
+    text = re.sub(r"\bLu\b", "L_u", text)
+    return text
+
+
+def clean_formula_text(text: str) -> str:
+    text = text.replace("\u00a0", " ").replace("\x10", "").replace("\x11", "")
+    text = "\n".join(line.strip() for line in text.splitlines() if line.strip())
+    text = re.sub(r"\s+", " ", text).strip()
+
+    text = re.sub(r"\bLs\s*=\s*X\s*(.+)\s+h,w$", r"L_s = Σ_{h,w} (\1)", text)
+    text = re.sub(r"([XY])\s*\(h,w\)\s*(cls|reg|obj)", r"\1_{\2}^{(h,w)}", text)
+    text = re.sub(r"Y\s+h,w\s+obj", r"Y_{obj}^{(h,w)}", text)
+    text = re.sub(r"\bLu\s*=\s*Lu\s+cls\s*\+\s*Lu\s+reg\s*\+\s*Lu\s+obj", r"L_u = L_u^{cls} + L_u^{reg} + L_u^{obj}", text)
+
+    text = re.sub(r"\bEx′,y′", "E_{x′,y′}", text)
+    text = re.sub(r"\bEx,y,ϵ", "E_{x,y,ϵ}", text)
+    text = re.sub(r"\bEx,y", "E_{x,y}", text)
+    text = re.sub(r"\bEϵ", "E_{ϵ}", text)
+    text = re.sub(r"\bE∥", "E∥", text)
+    text = re.sub(r"∥([^∥]+?)∥2\s*2", r"∥\1∥_2^2", text)
+    text = re.sub(r"([θΘ])T\b", r"\1^T", text)
+    text = re.sub(r"W\s*\((t(?:−1|-1)?)\)\s*EMAclientk", r"W_{EMA,client k}^{(\1)}", text)
+    text = re.sub(r"W\s*\((t(?:−1|-1)?)\)\s*client\s*k", r"W_{client k}^{(\1)}", text)
+    text = re.sub(r"\)\s*,\s*\((\d+)\)\)$", r")), (\1)", text)
+    text = re.sub(r"\s+([,.;:])", r"\1", text)
+    return text
+
+
+def clean_algorithm_text(text: str) -> str:
+    text = text.replace("\u00a0", " ").replace(" . . . ", " ... ")
+    text = text.replace("入力 :", "入力:")
+    text = re.sub(r"W[sS]\s*←\s*P\s*\n\s*k∈St\s*pkWu,k", "Ws ← Σ_{k∈S_t} p_k Wu,k", text)
+    lines = [line.rstrip() for line in text.splitlines()]
+    cleaned: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("//") and cleaned:
+            cleaned[-1] = f"{cleaned[-1]}  {stripped}"
+        else:
+            cleaned.append(stripped)
+    return "\n".join(cleaned)
+
+
+def math_density(text: str) -> float:
+    compact = re.sub(r"\s+", "", text)
+    if not compact:
+        return 0.0
+    math_chars = sum(char in "=+−-*/∈∑Σσθϵατ⊤∥⇐⇒≤≥←(){}[]_^′" for char in compact)
+    return math_chars / len(compact)
+
+
+def looks_like_algorithm(source: str, target: str) -> bool:
+    upper_source = source.upper()
+    if "INPUT :" in upper_source:
+        return True
+    if "←" not in source:
+        return False
+    if re.search(r"^\s*\d+:", source, re.MULTILINE):
+        return True
+    code_markers = [
+        "SAMPLECLIENTS",
+        "WARMUP(",
+        "CLIENT-BACKBONEUPDATE",
+        "CLIENT-ORTHOGONALUPDATE",
+        "SERVER-UPDATE",
+        "SERVER-ORTHOGONALUPDATE",
+    ]
+    return any(marker in upper_source for marker in code_markers)
+
+
+def looks_like_display_formula(source: str, target: str, has_pending_formula: bool = False) -> bool:
+    text = compact_heading(source)
+    if not text:
+        return False
+    if "…" in text or "..." in text:
+        return False
+    if has_pending_formula and re.fullmatch(r"[a-zA-Z]\s*,\s*[a-zA-Z]", text):
+        return True
+    if has_pending_formula and (
+        text.startswith(("+", "="))
+        or "CE(" in text
+        or re.search(r"\(\d+\)\s*$", text)
+    ):
+        return True
+    if text.startswith("W ("):
+        return True
+    if text.lower().startswith(("where ", "this ", "the ", "in ", "we ")):
+        return False
+    if re.search(r"\b(within|where|framework|model|server|client|data|loss|calculated|represents)\b", text, re.IGNORECASE):
+        return False
+    formula_markers = ["=", "⇐⇒", "CE(", "CIoU(", "∥", "⊤", "Σ", "←"]
+    if not any(marker in text for marker in formula_markers) and not text.startswith(("+", "=")):
+        return False
+    return math_density(text) >= 0.18 or re.search(r"\(\d+\)\s*$", text) is not None
+
+
 def normalize_translation(source: str, target: str, in_references: bool = False) -> str:
     if in_references:
         return source.strip()
@@ -84,7 +187,7 @@ def normalize_translation(source: str, target: str, in_references: bool = False)
         text = re.sub(r"^Table\s+", "表", text)
     if source.startswith("Figure"):
         text = re.sub(r"^Figure\s+", "図", text)
-    return text
+    return clean_inline_math(text)
 
 
 def source_markdown_role(source: str, target: str) -> str:
@@ -302,6 +405,24 @@ def export_markdown(run_dir: Path, output_dir: Path, filename: str = "paper-ja.m
 
     in_references = False
     emitted_assets: set[Path] = set()
+    pending_algorithm: list[str] = []
+    pending_formula: list[str] = []
+
+    def flush_algorithm() -> None:
+        if not pending_algorithm:
+            return
+        lines.extend(["```text", clean_algorithm_text("\n".join(pending_algorithm)), "```", ""])
+        pending_algorithm.clear()
+
+    def flush_formula() -> None:
+        if not pending_formula:
+            return
+        lines.extend(["$$", clean_formula_text("\n".join(pending_formula)), "$$", ""])
+        pending_formula.clear()
+
+    def flush_pending() -> None:
+        flush_algorithm()
+        flush_formula()
 
     first_segment_id = manifest["segments"][0]["id"] if manifest["segments"] else ""
     page_segments_map = segments_by_page(manifest)
@@ -312,43 +433,70 @@ def export_markdown(run_dir: Path, output_dir: Path, filename: str = "paper-ja.m
             if segment["id"] == first_segment_id:
                 continue
             source = segment["source"].strip()
-            role = source_markdown_role(source, translations.get(segment["id"], source))
-            if should_skip_markdown_segment(segment, translations.get(segment["id"], source)):
+            raw_target = translations.get(segment["id"], source)
+            role = source_markdown_role(source, raw_target)
+            is_algorithm = looks_like_algorithm(source, raw_target)
+            is_formula = looks_like_display_formula(source, raw_target, bool(pending_formula))
+            if should_skip_markdown_segment(segment, raw_target) and not (is_algorithm or is_formula):
                 continue
-            if segment_is_visual_label(segment, source):
+            if segment_is_visual_label(segment, source) and not (is_algorithm or is_formula):
                 continue
-            if role != "caption" and segment_inside_asset(segment, assets_by_page.get(page_index, [])):
+            if (
+                role != "caption"
+                and segment_inside_asset(segment, assets_by_page.get(page_index, []))
+                and not (is_algorithm or is_formula)
+            ):
                 continue
 
-            if source.lower() == "references" or translations.get(segment["id"], "").strip() == "参考文献":
+            if source.lower() == "references" or raw_target.strip() == "参考文献":
                 in_references = True
             elif in_references and starts_appendix(source):
                 in_references = False
 
             target = normalize_translation(
                 source,
-                translations.get(segment["id"], source),
+                raw_target,
                 in_references=in_references and role != "heading",
             )
             target = markdown_escape(target)
             if not target:
                 continue
 
+            if is_algorithm:
+                flush_formula()
+                pending_algorithm.append(target)
+                continue
+
+            if is_formula:
+                flush_algorithm()
+                pending_formula.append(source)
+                continue
+
+            flush_pending()
             if role == "heading":
-                target = compact_heading(target)
+                target_lines = [part.strip() for part in target.splitlines() if part.strip()]
+                if len(target_lines) >= 3 and re.match(r"^\d+(\.\d+)*$", target_lines[0]):
+                    heading_target = " ".join(target_lines[:2])
+                    body_target = " ".join(target_lines[2:])
+                else:
+                    heading_target = compact_heading(target)
+                    body_target = ""
                 heading_level = (
                     "##"
                     if re.match(r"^\d+(\.\d+)*\s+", compact_heading(source))
-                    or target in {"要旨", "参考文献"}
+                    or heading_target in {"要旨", "参考文献"}
                     else "###"
                 )
-                lines.extend([f"{heading_level} {target}", ""])
+                lines.extend([f"{heading_level} {heading_target}", ""])
+                if body_target:
+                    lines.extend([body_target, ""])
             elif role == "caption":
                 lines.extend([f"> {target}", ""])
             else:
                 paragraph = " ".join(part.strip() for part in target.splitlines() if part.strip())
                 lines.extend([paragraph, ""])
 
+        flush_pending()
         for asset in assets_by_page.get(page_index, []):
             if asset.path in emitted_assets:
                 continue

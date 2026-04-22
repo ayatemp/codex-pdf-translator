@@ -9,6 +9,7 @@ authors = [
   { name = "Kaku Ayato" }
 ]
 dependencies = [
+  "Markdown>=3.6",
   "PyMuPDF>=1.24.0",
   "reportlab>=4.2.0",
 ]

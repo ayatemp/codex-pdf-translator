@@ -15,6 +15,7 @@ key into the PDF tool itself. It relies on your existing Codex login.
 - Merges translated chunks into one `translations.json`.
 - Renders a final PDF with ReportLab.
 - Exports a Japanese Markdown reading file with cropped figure/table assets.
+- Renders that Markdown to a styled PDF through local Chrome/Chromium.
 - Supports three output modes:
   - `bilingual`: original page image on the left, translated text on the right.
   - `translated`: translated text only, reflowed for reading.
@@ -75,6 +76,9 @@ Merge and render:
 ```bash
 codex-pdf-translate merge runs/ifal
 codex-pdf-translate export-md runs/ifal --output-dir runs/ifal/output/markdown
+codex-pdf-translate render-md-pdf \
+  runs/ifal/output/markdown/paper-ja.md \
+  --output runs/ifal/output/markdown/paper-ja.pdf
 ```
 
 Or run the whole flow:
@@ -125,6 +129,8 @@ codex-pdf-translate render runs/ifal --mode translated
 - Markdown export writes one `paper-ja.md` plus PNG assets under `assets/`.
   Use this when PDF layout reconstruction is less important than readable
   Japanese text with figures and tables preserved as screenshots.
+- Markdown PDF rendering uses Chrome's print engine, so local image links such
+  as `assets/page-02-figure-01.png` are embedded in the generated PDF.
 
 ## Development
 

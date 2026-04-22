@@ -9,6 +9,7 @@ from codex_pdf_translator.codex_engine import merge_translations
 from codex_pdf_translator.extract import prepare_run
 from codex_pdf_translator.jsonio import read_json, write_json
 from codex_pdf_translator.markdown_export import export_markdown
+from codex_pdf_translator.md_pdf import markdown_to_html_document
 from codex_pdf_translator.render import render_pdf
 
 
@@ -66,3 +67,8 @@ def test_prepare_merge_render(tmp_path: Path) -> None:
     markdown = export_markdown(run_dir, tmp_path / "markdown")
     assert markdown.exists()
     assert "翻訳:" in markdown.read_text(encoding="utf-8")
+
+    html = markdown_to_html_document("# 見出し\n\n本文\n\n$$\nL_u = L_u^{cls}\n$$\n\n![図](assets/example.png)")
+    assert "<h1>" in html
+    assert "math-block" in html
+    assert "assets/example.png" in html
