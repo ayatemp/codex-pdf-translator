@@ -1,0 +1,88 @@
+<svg width="1536" height="768" viewBox="0 0 1536 768" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">codex-pdf-translator</title>
+  <desc id="desc">A PDF document flowing through a code icon into translated paper pages.</desc>
+  <rect width="1536" height="768" fill="#fbfbff"/>
+  <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(768 384) rotate(90) scale(420 760)">
+    <stop stop-color="#efeaff"/>
+    <stop offset="0.48" stop-color="#fbfbff"/>
+    <stop offset="1" stop-color="#fbfbff"/>
+  </radialGradient>
+  <rect width="1536" height="768" fill="url(#glow)"/>
+
+  <text x="768" y="190" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="88" font-weight="800" letter-spacing="8" fill="#16165c">codex-<tspan fill="#6b43c8">pdf</tspan>-translator</text>
+
+  <g opacity="0.55" stroke="#c8c9ef" stroke-width="4" stroke-linecap="round">
+    <path d="M455 412 C555 412 592 486 720 486 C839 486 874 398 967 398"/>
+    <path d="M455 438 C555 438 595 514 721 514 C850 514 905 424 995 424"/>
+    <path d="M461 463 C554 463 604 540 724 540 C867 540 935 444 1026 444"/>
+    <path d="M489 412 H612" stroke-dasharray="16 16" stroke="#5f48d9"/>
+    <path d="M866 412 H966" stroke-dasharray="16 16" stroke="#5f48d9"/>
+  </g>
+
+  <g transform="translate(160 300)">
+    <path d="M0 58 C0 35 18 16 41 16 H244 L324 96 V322 C324 345 306 364 283 364 H41 C18 364 0 345 0 322 V58Z" fill="white" stroke="#c7c9df" stroke-width="4"/>
+    <path d="M244 16 V76 C244 87 253 96 264 96 H324" stroke="#c7c9df" stroke-width="4"/>
+    <rect x="-32" y="60" width="170" height="76" rx="10" fill="#dc2626"/>
+    <text x="54" y="111" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="45" font-weight="800" fill="white">PDF</text>
+    <path d="M78 258 C139 215 209 203 251 215 C283 224 270 249 235 237 C185 219 132 171 123 117 C119 92 138 92 142 115 C150 176 105 250 73 281 C50 304 37 284 78 258Z" stroke="#d82626" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M46 248 H270 M46 276 H250 M46 304 H228" stroke="#d8d9e8" stroke-width="13" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(616 396)">
+    <rect x="0" y="0" width="276" height="204" rx="40" fill="#16165c"/>
+    <rect x="-16" y="-16" width="308" height="236" rx="56" stroke="#7d54dc" stroke-width="4"/>
+    <path d="M92 73 L52 113 L92 153" stroke="white" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M184 73 L224 113 L184 153" stroke="white" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M150 58 L126 167" stroke="white" stroke-width="13" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(946 328)">
+    <rect x="0" y="16" width="218" height="308" rx="22" fill="white" stroke="#d3d2ef" stroke-width="4"/>
+    <text x="58" y="112" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="76" font-weight="800" fill="#6941d1">A</text>
+    <path d="M42 152 H176 M42 186 H176 M42 220 H176 M42 254 H132" stroke="#cfc4f6" stroke-width="14" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(1116 292)">
+    <rect x="0" y="0" width="224" height="344" rx="22" fill="#fbfbff" stroke="#c8c9ef" stroke-width="4"/>
+    <text x="64" y="86" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="72" font-weight="800" fill="#234aa8">文</text>
+    <path d="M48 130 H170 M48 166 H170 M48 202 H170 M48 238 H130" stroke="#aebff0" stroke-width="12" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(1294 380)">
+    <rect x="0" y="0" width="166" height="260" rx="22" fill="white" stroke="#c8c9df" stroke-width="4"/>
+    <text x="38" y="78" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="60" font-weight="800" fill="#178e91">가</text>
+    <path d="M36 116 H122 M36 150 H122 M36 184 H122 M36 218 H86" stroke="#93d1d1" stroke-width="12" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(1084 528)">
+    <circle cx="120" cy="120" r="118" fill="#8c7ae6" opacity="0.72" stroke="#6751d1" stroke-width="4"/>
+    <path d="M57 88 C83 66 104 70 130 62 C143 58 172 64 188 74 C166 83 161 101 144 104 C132 107 111 97 105 114 C98 134 74 130 65 148 C56 166 45 157 43 139 C41 119 39 103 57 88Z" fill="#eef0ff" opacity="0.9"/>
+    <path d="M142 147 C162 149 178 160 191 179 C171 196 146 202 124 193 C103 184 108 164 123 156 C130 151 136 148 142 147Z" fill="#eef0ff" opacity="0.72"/>
+  </g>
+
+  <g transform="translate(1010 620)">
+    <rect x="0" y="0" width="146" height="72" rx="24" fill="#7a4ee0"/>
+    <path d="M44 72 L48 96 L76 72" fill="#7a4ee0"/>
+    <circle cx="42" cy="36" r="8" fill="white"/>
+    <circle cx="73" cy="36" r="8" fill="white"/>
+    <circle cx="104" cy="36" r="8" fill="white"/>
+  </g>
+
+  <g transform="translate(1324 646)">
+    <rect x="0" y="0" width="132" height="62" rx="22" fill="#28a9bd"/>
+    <path d="M78 62 L100 86 L104 62" fill="#28a9bd"/>
+    <circle cx="36" cy="31" r="8" fill="white"/>
+    <circle cx="66" cy="31" r="8" fill="white"/>
+    <circle cx="96" cy="31" r="8" fill="white"/>
+  </g>
+
+  <g fill="#b9b5f2" opacity="0.65">
+    <circle cx="84" cy="418" r="7"/>
+    <circle cx="548" cy="398" r="7"/>
+    <circle cx="985" cy="680" r="6"/>
+    <circle cx="1370" cy="330" r="6"/>
+    <path d="M140 246 L148 266 L168 274 L148 282 L140 302 L132 282 L112 274 L132 266Z"/>
+    <path d="M856 344 L864 364 L884 372 L864 380 L856 400 L848 380 L828 372 L848 364Z"/>
+    <path d="M1398 248 L1406 270 L1428 278 L1406 286 L1398 308 L1390 286 L1368 278 L1390 270Z"/>
+  </g>
+</svg>
